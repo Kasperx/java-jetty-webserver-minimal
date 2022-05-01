@@ -1,5 +1,7 @@
 package database;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -115,5 +117,33 @@ public abstract class Database extends Dao_DBConnect implements DatabaseInterfac
 	{
 		this.headerInUppercaseCharacter = headerInUppercaseCharacter;
 	}
-    
+	public Map <String, String> getProperties(String filename)
+    {
+        mapFromFile = new HashMap<String, String>();
+        try (BufferedReader br = new BufferedReader( new FileReader(filename));)
+        {
+                        String line = "";
+                mapFromFile = new HashMap<String, String>();
+                        while ((line = br.readLine()) != null)
+                        {
+                String[] parts = line.split("=");
+                String name = parts[0].trim();
+                String value = parts[1].trim();
+                if(!name.equals("") && !value.equals(""))
+                {
+                    mapFromFile.put(name, value);
+                }
+            }
+                }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            return mapFromFile;
+        }
+        return mapFromFile;
+    }
+    public String getProperty (String keyname)
+    {
+        return mapFromFile.get(keyname);
+    }
 }
