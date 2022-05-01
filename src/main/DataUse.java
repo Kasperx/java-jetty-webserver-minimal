@@ -131,9 +131,7 @@ public class DataUse
         try
         {
             System.out.println("Found request: "+request.getParameter("get"));
-            response.setCharacterEncoding("utf-8");
-            response.setContentType("text/html");
-            response.setStatus(HttpServletResponse.SC_OK);
+            generateWebsiteMetadata(response);
             String websitedata = htmlhead;
             websitedata += "<table class=\"table\">";
 //            websitedata += "<tr>"
@@ -163,11 +161,11 @@ public class DataUse
             e.printStackTrace();
         }
     }
-    public static void clientRequest_Weather(HttpServletRequest request, HttpServletResponse response)
+    public void clientRequest_Weather(HttpServletRequest request, HttpServletResponse response)
     {
         try {
             System.out.println("Found request: "+request.getParameter("get"));
-            String url = "https://dwd.api.bund.dev/stationOverviewExtended";
+//            String url = "https://dwd.api.bund.dev/stationOverviewExtended";
             CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
 //            Credentials credentials = new UsernamePasswordCredentials("username", "password");
             Credentials credentials = new UsernamePasswordCredentials("", "");
@@ -216,14 +214,12 @@ public class DataUse
             System.err.println(e.toString());
         }
     }
-    public static void clientRequest_CallDataFromDb(HttpServletRequest request, HttpServletResponse response)
+    public void clientRequest_CallDataFromDb(HttpServletRequest request, HttpServletResponse response)
     {
         try
         {
             System.out.println("Found request: "+request.getParameter("get"));
-            response.setCharacterEncoding("utf-8");
-            response.setContentType("text/html");
-            response.setStatus(HttpServletResponse.SC_OK);
+            generateWebsiteMetadata(response);
             ArrayList <ArrayList<String>> data = databasesource.getData();
             String websitedata = fillWebsiteWithData(data);
             databasesource.close();
@@ -288,13 +284,11 @@ public class DataUse
 //    		e.printStackTrace();
 //    	}
 //    }
-    public static void clientRequest_askUserData(HttpServletRequest request, HttpServletResponse response)
+    public void clientRequest_askUserData(HttpServletRequest request, HttpServletResponse response)
     {
         try
         {
-            response.setCharacterEncoding("utf-8");
-            response.setContentType("text/html");
-            response.setStatus(HttpServletResponse.SC_OK);
+            generateWebsiteMetadata(response);
             String websitedata = htmlhead;
             websitedata += "<form>";
             websitedata += ""
@@ -321,7 +315,7 @@ public class DataUse
             e.printStackTrace();
         }
     }
-    public static void clientRequest_GetAllData(HttpServletRequest request, HttpServletResponse response)
+    public void clientRequest_GetAllData(HttpServletRequest request, HttpServletResponse response)
     {
         try
         {
@@ -332,10 +326,7 @@ public class DataUse
 //            databasesource = new DatabaseSQLite();
             if(databasesource.isPermitted(name, pw))
             {
-                response.setCharacterEncoding("utf-8");
-//            response.setContentType("application/json");
-                response.setContentType("text/html");
-                response.setStatus(HttpServletResponse.SC_OK);
+                generateWebsiteMetadata(response);
                 ArrayList <ArrayList<String>> data = databasesource.getAllData();
                 String websitedata = fillWebsiteWithData(data);
                 databasesource.close();
@@ -354,6 +345,14 @@ public class DataUse
             e.printStackTrace();
         }
     }
+
+	private void generateWebsiteMetadata(HttpServletResponse response)
+	{
+		response.setCharacterEncoding("utf-8");
+//            response.setContentType("application/json");
+		response.setContentType("text/html");
+		response.setStatus(HttpServletResponse.SC_OK);
+	}
 
 	private static String fillWebsiteWithData(ArrayList <ArrayList<String>> data)
 	{
