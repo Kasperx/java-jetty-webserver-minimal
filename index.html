@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="utf-8">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+<title>data</title>
+<style type="text/css">
+ /* The Modal (background) */
+.modal {
+  display: none; /* Hidden by default */
+  position: fixed; /* Stay in place */
+  z-index: 1; /* Sit on top */
+  left: 0;
+  top: 0;
+  width: 100%; /* Full width */
+  height: 100%; /* Full height */
+  overflow: auto; /* Enable scroll if needed */
+  background-color: rgb(0,0,0); /* Fallback color */
+  background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+  padding-top: 60px;
+}
+
+/* Modal Content/Box */
+.modal-content {
+  background-color: #fefefe;
+  margin: 5px auto; /* 15% from the top and centered */
+  border: 1px solid #888;
+  width: 80%; /* Could be more or less, depending on screen size */
+}
+
+/* The Close Button */
+.close {
+  /* Position it in the top right corner outside of the modal */
+  position: absolute;
+  right: 25px;
+  top: 0;
+  color: #000;
+  font-size: 35px;
+  font-weight: bold;
+}
+
+/* Close button on hover */
+.close:hover,
+.close:focus {
+  color: red;
+  cursor: pointer;
+}
+
+/* Add Zoom Animation */
+.animate {
+  -webkit-animation: animatezoom 0.6s;
+  animation: animatezoom 0.6s
+}
+
+@-webkit-keyframes animatezoom {
+  from {-webkit-transform: scale(0)}
+  to {-webkit-transform: scale(1)}
+}
+
+@keyframes animatezoom {
+  from {transform: scale(0)}
+  to {transform: scale(1)}
+} 
+</style>
+</head>
+<body class="container" style="font-size:30px";>
+<div> some codes </div>
+<ul>
+<li><button onclick=""><a href="?get=insert">insert data</a></button></li>
+<li><button onclick=""><a href="?get=data">get data</a></button></li>
+<li><button onclick=""><a href="?get=admin">get all data</a></button></li>
+<!--<li><a href="?get=weather">show weather data</a></li>-->
+<li><button onclick=""><a onclick="showWeather();">show weather data</a></button></li>
+<!--<li><a href="javascript:login('show');">get all data</a></li>-->
+<!-- <a href="javascript:login('show');">login</a></p> -->
+</ul>
+ <!-- Button to open the modal login form -->
+<button onclick="document.getElementById('login').style.display='block'">Login</button>
+
+<!-- The Modal -->
+<div id="login" class="modal">
+<span onclick="document.getElementById('login').style.display='none'"
+	class="close" title="Close Modal">&times;
+</span>
+
+  <!-- Modal Content -->
+  <!--<form class="modal-content animate" action="/action_page.php">-->
+  <form class="modal-content animate">
+    <div class="imgcontainer"><img alt="Login" class="avatar"></div>
+    <div class="container">
+      <label for="uname"><b>Username</b></label>
+      <input type="text" placeholder="Enter Username" id="uname" required>
+	<p>
+      <label for="psw"><b>Password</b></label>
+      <input type="password" placeholder="Enter Password" id="psw" required>
+	<p>
+      <!--<button onclick="login();" type="submit" id="login_btn">Login</button>-->
+      <button onclick="login();" id="login_btn">Login</button>
+	<p>
+      <label>
+        <input type="checkbox" checked="checked" id="remember"> Remember me
+      </label>
+    </div>
+
+    <div class="container" style="background-color:#f1f1f1">
+      <button type="button" onclick="document.getElementById('login').style.display='none'" class="cancelbtn">Cancel</button>
+      <span class="psw"><a href="#">Forgot password?</a></span>
+    </div>
+  </form>
+</div> 
+</body>
+<script src="index.js"></script>
+</html>

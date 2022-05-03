@@ -1,0 +1,113 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>java-jetty-webserver-minimal</groupId>
+  <artifactId>java-jetty-webserver-minimal</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+  <build>
+    <sourceDirectory>src</sourceDirectory>
+    <plugins>
+      <plugin>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.8.1</version>
+        <configuration>
+          <source>1.8</source>
+          <target>1.8</target>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+  <packaging>jar</packaging>
+    <properties>
+		<vaadin.version>8.2.0</vaadin.version>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<maven.compiler.source>1.8</maven.compiler.source>
+		<maven.compiler.target>1.8</maven.compiler.target>
+		<!-- If there are no local customizations, this can also be "fetch" or "cdn" -->
+		<vaadin.widgetset.mode>cdn</vaadin.widgetset.mode>
+		<jetty.version>9.2.3.v20140905</jetty.version>
+	</properties>
+  <dependencies>
+  <dependency>
+<groupId>org.apache.httpcomponents</groupId>
+<artifactId>httpclient</artifactId>
+<version>4.4</version>
+</dependency>
+  	<dependency>
+    <groupId>org.eclipse.jetty</groupId>
+    <artifactId>jetty-server</artifactId>
+    <version>9.2.15.v20160210</version>
+	</dependency>
+	<dependency>
+    <groupId>org.json</groupId>
+    <artifactId>json</artifactId>
+    <version>20190722</version>
+	</dependency>
+	<!-- https://mvnrepository.com/artifact/com.google.code.gson/gson -->
+	<dependency>
+    <groupId>com.google.code.gson</groupId>
+    <artifactId>gson</artifactId>
+    <version>2.8.6</version>
+	</dependency>
+	<!-- https://mvnrepository.com/artifact/org.eclipse.jetty/jetty-servlet -->
+	<dependency>
+    <groupId>org.eclipse.jetty</groupId>
+    <artifactId>jetty-servlet</artifactId>
+    <version>9.2.15.v20160210</version>
+</dependency>
+<!-- https://mvnrepository.com/artifact/org.xerial/sqlite-jdbc -->
+<dependency>
+    <groupId>org.xerial</groupId>
+    <artifactId>sqlite-jdbc</artifactId>
+    <version>3.34.0</version>
+</dependency>
+<dependency>
+    <groupId>com.github.javafaker</groupId>
+    <artifactId>javafaker</artifactId>
+    <version>0.12</version>
+</dependency>
+<!-- https://mvnrepository.com/artifact/com.vaadin/vaadin-server -->
+<dependency>
+    <groupId>com.vaadin</groupId>
+    <artifactId>vaadin-server</artifactId>
+    <version>8.14.0</version>
+</dependency>
+<!-- https://mvnrepository.com/artifact/log4j/log4j -->
+<dependency>
+    <groupId>log4j</groupId>
+    <artifactId>log4j</artifactId>
+    <version>1.2.17</version>
+</dependency>
+<!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot -->
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot</artifactId>
+    <version>2.6.2</version>
+</dependency>
+<dependency>
+          <groupId>com.vaadin</groupId>
+          <artifactId>vaadin-server</artifactId>
+          <type>jar</type>
+          <version>${vaadin.version}</version>
+          <exclusions>
+              <exclusion>
+                  <groupId>com.vaadin.external.flute</groupId>
+                  <artifactId>flute</artifactId>
+              </exclusion>
+              <exclusion>
+                  <groupId>com.vaadin.external.google</groupId>
+                  <artifactId>guava</artifactId>
+              </exclusion>
+              <exclusion>
+                 <groupId>com.vaadin</groupId>
+                 <artifactId>vaadin-sass-compiler</artifactId>
+             </exclusion>
+          </exclusions>
+      </dependency>
+<dependency>
+	<groupId>com.vaadin</groupId>
+	<artifactId>vaadin-client-compiled</artifactId>
+	<version>${vaadin.version}</version>
+</dependency>
+<!-- Instead of Valo, we use dawn -->
+  </dependencies>
+</project>
