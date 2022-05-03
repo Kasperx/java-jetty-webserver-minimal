@@ -1,6 +1,7 @@
 package database;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
 import java.sql.Connection;
 import java.util.ArrayList;
@@ -120,6 +121,11 @@ public abstract class Database extends Dao_DBConnect implements DatabaseInterfac
 	public Map <String, String> getProperties(String filename)
     {
         mapFromFile = new HashMap<String, String>();
+        if(!new File(filename).exists())
+        {
+            System.out.println("File '"+filename+"' does not exist");
+            return mapFromFile;
+        }
         try (BufferedReader br = new BufferedReader( new FileReader(filename));)
         {
                         String line = "";
@@ -134,7 +140,7 @@ public abstract class Database extends Dao_DBConnect implements DatabaseInterfac
                     mapFromFile.put(name, value);
                 }
             }
-                }
+        }
         catch (Exception e)
         {
             e.printStackTrace();
