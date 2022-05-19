@@ -2,12 +2,6 @@ package main;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.*;
-import java.util.stream.Collectors;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -17,14 +11,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.json.JSONArray;
-import org.json.JSONObject;
-
-import com.google.gson.GsonBuilder;
-import com.vaadin.server.VaadinServlet;
-
-import Vaadin.HelloWorldUI;
-import database.DatabaseSQLite;
 
 public class Web
 {

@@ -36,8 +36,8 @@ public abstract class Database extends Dao_DBConnect implements DatabaseInterfac
 //    }
     public static Database getInstance()
     {
-//        return getInstance(Enum_Database.file);
-        return getInstance(Enum_Database.sqlite);
+        return getInstance(Enum_Database.file);
+//        return getInstance(Enum_Database.sqlite);
     }
     public static Database getInstance(Enum_Database source)
     {

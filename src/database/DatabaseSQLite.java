@@ -9,14 +9,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Random;
-import java.util.Set;
 
 public class DatabaseSQLite extends Database
 {  
@@ -43,8 +38,11 @@ public class DatabaseSQLite extends Database
     {
         try
         {
-            Class.forName("org.sqlite.JDBC");
-            connection = DriverManager.getConnection("jdbc:sqlite:"+path);
+        	if(connection == null || connection.isClosed())
+        	{
+//        		Class.forName("org.sqlite.JDBC");
+        		connection = DriverManager.getConnection("jdbc:sqlite:"+path);
+        	}
         }
         catch(Exception e)
         {
@@ -56,7 +54,7 @@ public class DatabaseSQLite extends Database
         try
         {
             Class.forName("org.sqlite.JDBC");
-            if(connection.isClosed() || connection != null)
+            if(connection != null && !connection.isClosed())
             {
                 connection.close();
                 connection = null;
@@ -76,37 +74,13 @@ public class DatabaseSQLite extends Database
         		+ "lastname "
         		+ "FROM "
         		+ "person "
-        		+ "where name != 'admin'";
+        		+ "where name != 'admin';";
         ArrayList<ArrayList<String>> data = getDataFromDBWithHeader(sql);
-//        ResultSet resultSet = executeGet(sql);
-//        ResultSetMetaData rsmd = getMetaData(sql);
-//        try
-//        {
-//            ArrayList <String> temp = new ArrayList<String>();
-//            for(int column=1; column <= rsmd.getColumnCount(); column++)
-//            {
-//        		temp.add(rsmd.getColumnName(column));
-//            }
-//            data.add(temp);
-//            while(resultSet.next())
-//            {
-//            	temp = new ArrayList<String>();
-//            	for(int column=1; column <= rsmd.getColumnCount(); column++)
-//            	{
-//            			temp.add(resultSet.getString(column));
-//            	}
-//            	data.add(temp);
-//            }
-//        }
-//        catch(SQLException e)
-//        {
-//            e.printStackTrace();
-//        }
         return data;
     }
     public int getId(String name)
     {
-        ResultSet resultSet = executeGet("SELECT id FROM person where name = '"+name+"'");
+        ResultSet resultSet = executeGet("SELECT id FROM person where name = '"+name+"';");
         try
         {
             if(resultSet.next())
@@ -180,36 +154,10 @@ public class DatabaseSQLite extends Database
     }
     public void insertData()
     {
-//        ///////////////////////////////////////////////////////////
-//        // get names, but only once (-> set)
-//        String [] names = {
-//                "detlef",
-//                "arnold",
-//                "ulrike",
-//                "emil",
-//                "lena",
-//                "laura",
-//                "achim",
-//                "mia",
-//                "anna",
-//                "jonas"
-//        };
-//        Map <String, Integer> result = new HashMap<String, Integer>();
-//        Set unique = new HashSet();
-//        int temp = 0;
-//        while(temp<5)
-//        {
-//            String found = names[new Random().nextInt(10)];
-//            if(unique.add(found))
-//            {
-//                result.put(found, new Random().nextInt(10000000) + 1000000);
-//                temp++;
-//            }
-//        }
         HashMap <String[], Integer> result = getNewData();
         ///////////////////////////////////////////////////////////
-        executeSet("insert into person (name, lastname) values ('admin', 'admin')");
-        executeSet("insert into login (p_id, p_password, p_admin) values (1, 'secret', 'true')");
+        executeSet("insert into person (name, lastname) values ('admin', 'admin');");
+        executeSet("insert into login (p_id, p_password, p_admin) values (1, 'secret', 'true');");
         for(Entry <String[], Integer> entry: result.entrySet())
         {
         	String name = entry.getKey()[0];
@@ -222,10 +170,10 @@ public class DatabaseSQLite extends Database
             		+ ") "
             		+ "values "
             		+ "("
-            		+ "'"+name+"', "
-    				+ "'"+lastname+"'"
+            		+ "'"+name.replace("'", "-")+"', "
+    				+ "'"+lastname.replace("'", "-")+"'"
 					+ ")"
-					+ "");
+					+ ";");
             executeSet("insert into "
             		+ "login ("
             		+ "p_id, "
@@ -233,7 +181,7 @@ public class DatabaseSQLite extends Database
             		+ ") values ("
             		+ ""+getId(name)+", "
     				+ "'"+pw+"'"
-					+ ")");
+					+ ");");
         }
     }
     public boolean isPermitted(String name, String password)
@@ -268,6 +216,7 @@ public class DatabaseSQLite extends Database
         try
         {
             System.out.println(sql);
+//            connect();
             PreparedStatement stmt = connection.prepareStatement(sql);
             return stmt.executeQuery();
         }
@@ -281,7 +230,7 @@ public class DatabaseSQLite extends Database
     {
     	try
     	{
-    		System.out.println(sql);
+//    		System.out.println(sql);
     		PreparedStatement stmt = connection.prepareStatement(sql);
     		return stmt.getMetaData();
     	}
@@ -296,7 +245,9 @@ public class DatabaseSQLite extends Database
         try
         {
             System.out.println(sql);
+//            connect();
             connection.prepareStatement(sql).executeUpdate();
+//            close();
         }
         catch(SQLException e)
         {
@@ -333,6 +284,7 @@ public class DatabaseSQLite extends Database
             	}
             	data.add(temp);
             }
+            resultSet.close();
         }
         catch(SQLException e)
         {
@@ -362,6 +314,7 @@ public class DatabaseSQLite extends Database
     				temp.add(rsmd.getColumnName(column).toLowerCase());
     			}
     		}
+    		resultSet.close();
     		header.add(temp);
     		// get content
     		content = getDataFromDB(sql, resultSet, rsmd);
@@ -380,6 +333,21 @@ public class DatabaseSQLite extends Database
     		e.printStackTrace();
     	}
     	return data;
-    }    
+    }
+    public static void main(String[] args) {
+    	DatabaseSQLite obj = new DatabaseSQLite();
+    	obj.createDatabaseIfNotExists();
+    	obj.insertData();
+    	ArrayList<ArrayList<String>> data = obj.getData();
+    	for(ArrayList<String> temp: data)
+    	{
+    		for(String temp1: temp)
+    		{
+    			System.out.print(temp1+" : ");
+    		}
+    		System.out.println();
+    		
+    	}
+	}
 }  
 

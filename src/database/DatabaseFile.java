@@ -1,6 +1,7 @@
 
 package database;
 
+import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -13,6 +14,9 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Random;
+
+import org.eclipse.jetty.io.EofException;
+
 import java.util.Map.Entry;
 
 public class DatabaseFile extends Database implements Serializable
@@ -108,6 +112,10 @@ public class DatabaseFile extends Database implements Serializable
         catch(FileNotFoundException fnfe)
         {
             fnfe.printStackTrace();
+        }
+        catch(EOFException e)
+        {
+//        	e.printStackTrace();
         }
         catch(IOException e)
         {
