@@ -27,14 +27,8 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.HttpClientBuilder;
-//import org.json.JSONArray;
-//import org.json.JSONObject;
-
-//import com.google.gson.GsonBuilder;
 
 import database.Database;
-import database.DatabaseFile;
-import database.DatabaseSQLite;
 
 public class DataUse
 {
