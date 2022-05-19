@@ -25,7 +25,8 @@ public class Test {
 	}
 
 	@org.junit.Test
-	public void test() {
+	public void test()
+	{
 		ArrayList<ArrayList<String>> data =  sql.getData();
 		System.out.println();
 		Assert.assertEquals(2, data.size());
