@@ -28,11 +28,9 @@ import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.HttpClientBuilder;
 
-import database.Database;
-
 public class DataUse
 {
-    static Database databasesource;
+    static DatabaseSQLite databasesource;
     String httpbase;
     static String htmlhead;
     static String htmlend;
@@ -72,7 +70,7 @@ public class DataUse
         htmlend = ""
                 + "</body>"
                 ;
-        databasesource = Database.getInstance();
+        databasesource = new DatabaseSQLite();
         databasesource.setHeaderInUppercaseCharacter(true);
         databasesource.getProperties(System.getProperty("user.dir")+File.separator+"login.txt");
     }
@@ -412,47 +410,17 @@ public class DataUse
         try
         {
             System.out.println("Found request: "+request.getParameter("get"));
-//            DatabaseSQLite database = new DatabaseSQLite();
             databasesource.createDatabaseIfNotExists();
-//            ((DatabaseSQLite)databasesource.getInstance()).insertData();
-            ((DatabaseFile)databasesource.getInstance()).insertData();
-//            databasesource.getInstance().insertData();
             databasesource.close();
             response.setCharacterEncoding("utf-8");
             response.setContentType("application/json");
             response.setStatus(HttpServletResponse.SC_OK);
             response.getWriter().println("{ \"status\": \"ok\"}");
-//            out.print(result);
-//            out.close();
         }
         catch (Exception e) {
             e.printStackTrace();
         }
     }
-//    public static void clientRequest_TableNames(HttpServletRequest request, HttpServletResponse response)
-//    {
-//        JSONObject json_mapForJSON = null;
-//        try
-//        {
-//            System.out.println("Found request: "+request.getParameter("get"));
-//            JSONArray array = new JSONArray();
-//            array.put("hallo1");
-//            array.put("hallo2");
-//            array.put("hallo3");
-//            json_mapForJSON = new JSONObject();
-//            json_mapForJSON.put("Tablenames", array);
-//            String result = new GsonBuilder().create().toJson(json_mapForJSON);
-//            response.setCharacterEncoding("utf-8");
-//            response.setContentType("application/json");
-//            response.setStatus(HttpServletResponse.SC_OK);
-//            PrintWriter out = response.getWriter();
-//            out.print(result);
-//            out.close();
-//        }
-//        catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//    }
     private List <List<String>> vectorToArrayList2D (Vector dataRows)
     {
         List <List<String>> array = new ArrayList<List<String>>();

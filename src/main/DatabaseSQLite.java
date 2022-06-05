@@ -1,5 +1,5 @@
 
-package database;
+package main;
 
 import java.io.File;
 import java.io.IOException;
@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map.Entry;
 
-public class DatabaseSQLite extends Database
+public class DatabaseSQLite extends Tools
 {  
     String path = System.getProperty("user.dir")+"/test.db";
     Connection connection = null;
