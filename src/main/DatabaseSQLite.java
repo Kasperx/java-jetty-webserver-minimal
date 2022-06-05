@@ -71,12 +71,16 @@ public class DatabaseSQLite extends Tools
     {
         String sql = ""
         		+ "SELECT "
-        		+ "id, "
         		+ "name, "
         		+ "lastname "
         		+ "FROM "
         		+ "person "
         		+ "where name != 'admin';";
+//        String sql = ""
+//        		+ "SELECT * "
+//        		+ "FROM "
+//        		+ "person "
+//        		+ "where name != 'admin';";
         ArrayList<ArrayList<String>> data = getDataFromDBWithHeader(sql);
         return data;
     }
@@ -104,6 +108,8 @@ public class DatabaseSQLite extends Tools
                 + "person.id, "
                 + "person.name, "
                 + "person.lastname, "
+                + "person.email, "
+                + "person.address, "
                 + "login.p_password, "
                 + "login.p_admin "
                 + "FROM person "
@@ -143,7 +149,9 @@ public class DatabaseSQLite extends Tools
         executeSet("create table if not exists person ("
                 + "id integer primary key autoincrement,"
                 + "name text unique,"
-                + "lastname text"
+                + "lastname text,"
+                + "email text,"
+                + "address text"
                 + ")");
         executeSet("create table if not exists login ("
                 + "id integer primary key autoincrement,"
@@ -166,16 +174,22 @@ public class DatabaseSQLite extends Tools
         {
         	String name = entry.getKey()[0];
         	String lastname = entry.getKey()[1];
+        	String email = entry.getKey()[2];
+        	String address = entry.getKey()[3];
         	int pw = entry.getValue();
             executeSet(""
             		+ "insert into person ("
             		+ "name, "
-            		+ "lastname"
+            		+ "lastname, "
+            		+ "email,"
+            		+ "address"
             		+ ") "
             		+ "values "
             		+ "("
             		+ "'"+name.replace("'", "-")+"', "
-    				+ "'"+lastname.replace("'", "-")+"'"
+    				+ "'"+lastname.replace("'", "-")+"', "
+    				+ "'"+email.replace("'", "-")+"', "
+    				+ "'"+address.replace("'", "-")+"'"
 					+ ")"
 					+ ";");
             executeSet("insert into "
@@ -299,6 +313,10 @@ public class DatabaseSQLite extends Tools
         try
         {
         	ArrayList <String> temp = new ArrayList<String>();
+        	if(resultSet.isClosed())
+        	{
+        		System.err.println("connection closed");
+        	}
             while(resultSet.next())
             {
             	temp = new ArrayList<String>();

@@ -25,9 +25,11 @@ public class Tools
 //            String name = faker.name().fullName();
             String firstName = faker.name().firstName();
             String lastName = faker.name().lastName();
-//            String streetAddress = faker.address().streetAddress();
+            String streetAddress = faker.address().streetAddress();
 //            result.put(firstName, new Random().nextInt(10000000) + 1000000);
-            result.put(new String[]{firstName, lastName}, new Random().nextInt(10000000) + 1000000);
+            String email = firstName.substring(0,1)+"."+lastName+"@web.de";
+            result.put(new String[]{firstName, lastName, email.toLowerCase(), streetAddress},
+            		new Random().nextInt(10000000) + 1000000);
             temp++;
         }
         return result;
