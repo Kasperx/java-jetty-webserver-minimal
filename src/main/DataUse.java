@@ -205,7 +205,6 @@ public class DataUse
             generateWebsiteMetadata(response);
             ArrayList <ArrayList<String>> data = databasesource.getData();
             String websitedata = fillWebsiteWithData(data);
-            databasesource.close();
 //            System.out.println(websitedata);
             response.getWriter().append(websitedata);
         }
@@ -312,7 +311,6 @@ public class DataUse
                 generateWebsiteMetadata(response);
                 ArrayList <ArrayList<String>> data = databasesource.getAllData();
                 String websitedata = fillWebsiteWithData(data);
-                databasesource.close();
                 response.getWriter().println(websitedata);
             }
             else
@@ -411,7 +409,7 @@ public class DataUse
         {
             System.out.println("Found request: "+request.getParameter("get"));
             databasesource.createDatabaseIfNotExists();
-            databasesource.close();
+            databasesource.insertData();
             response.setCharacterEncoding("utf-8");
             response.setContentType("application/json");
             response.setStatus(HttpServletResponse.SC_OK);

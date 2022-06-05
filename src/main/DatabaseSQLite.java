@@ -1,6 +1,7 @@
 
 package main;
 
+import java.sql.Statement;
 import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;  
@@ -40,8 +41,9 @@ public class DatabaseSQLite extends Tools
         {
         	if(connection == null || connection.isClosed())
         	{
-//        		Class.forName("org.sqlite.JDBC");
+        		Class.forName("org.sqlite.JDBC");
         		connection = DriverManager.getConnection("jdbc:sqlite:"+path);
+        		System.out.println("Connected to database '"+path+"'.");
         	}
         }
         catch(Exception e)
@@ -49,22 +51,22 @@ public class DatabaseSQLite extends Tools
             e.printStackTrace();
         }
     }
-    public void close()
-    {
-        try
-        {
-            Class.forName("org.sqlite.JDBC");
-            if(connection != null && !connection.isClosed())
-            {
-                connection.close();
-                connection = null;
-            }
-        }
-        catch(Exception e)
-        {
-            e.printStackTrace();
-        }
-    }
+//    public void close()
+//    {
+//        try
+//        {
+//            Class.forName("org.sqlite.JDBC");
+//            if(connection != null && !connection.isClosed())
+//            {
+//                connection.close();
+//                connection = null;
+//            }
+//        }
+//        catch(Exception e)
+//        {
+//            e.printStackTrace();
+//        }
+//    }
     public ArrayList<ArrayList<String>> getData()
     {
         String sql = ""
@@ -85,7 +87,9 @@ public class DatabaseSQLite extends Tools
         {
             if(resultSet.next())
             {
-                return resultSet.getInt("id");
+            	int id = resultSet.getInt("id");
+            	close(resultSet);
+                return id;
             }
         }
         catch(SQLException e)
@@ -203,6 +207,7 @@ public class DatabaseSQLite extends Tools
                     return false;
                 }
             }
+            close(resultSet);
             return false;
         }
         catch(SQLException e)
@@ -211,14 +216,33 @@ public class DatabaseSQLite extends Tools
             return false;
         }
     }
-    ResultSet executeGet(String sql)
+    private void close(ResultSet resultSet)
+    {
+    	try {
+    		if(resultSet != null && !resultSet.isClosed())
+    		{
+    			resultSet.close();
+    		}
+    		if(connection != null)
+    		{
+    			connection.close();
+    		}
+		}
+    	catch (SQLException e)
+    	{
+			e.printStackTrace();
+		}
+	}
+	ResultSet executeGet(String sql)
     {
         try
         {
             System.out.println(sql);
-//            connect();
-            PreparedStatement stmt = connection.prepareStatement(sql);
-            return stmt.executeQuery();
+            connect();
+//            PreparedStatement stmt = connection.prepareStatement(sql);
+//            return stmt.executeQuery();
+            Statement st = connection.createStatement();
+            return st.executeQuery(sql);
         }
         catch(SQLException e)
         {
@@ -245,9 +269,9 @@ public class DatabaseSQLite extends Tools
         try
         {
             System.out.println(sql);
-//            connect();
+            connect();
             connection.prepareStatement(sql).executeUpdate();
-//            close();
+            close(null);
         }
         catch(SQLException e)
         {
@@ -284,7 +308,7 @@ public class DatabaseSQLite extends Tools
             	}
             	data.add(temp);
             }
-            resultSet.close();
+            close(resultSet);
         }
         catch(SQLException e)
         {
@@ -299,6 +323,7 @@ public class DatabaseSQLite extends Tools
     	ArrayList <ArrayList<String>> content = new ArrayList<ArrayList<String>>();
     	try
     	{
+    		connect();
     		ResultSet resultSet = executeGet(sql);
     		// get header
     		ResultSetMetaData rsmd = getMetaData(sql);
@@ -314,7 +339,7 @@ public class DatabaseSQLite extends Tools
     				temp.add(rsmd.getColumnName(column).toLowerCase());
     			}
     		}
-    		resultSet.close();
+    		close(resultSet);
     		header.add(temp);
     		// get content
     		content = getDataFromDB(sql, resultSet, rsmd);
@@ -334,20 +359,20 @@ public class DatabaseSQLite extends Tools
     	}
     	return data;
     }
-    public static void main(String[] args) {
-    	DatabaseSQLite obj = new DatabaseSQLite();
-    	obj.createDatabaseIfNotExists();
-    	obj.insertData();
-    	ArrayList<ArrayList<String>> data = obj.getData();
-    	for(ArrayList<String> temp: data)
-    	{
-    		for(String temp1: temp)
-    		{
-    			System.out.print(temp1+" : ");
-    		}
-    		System.out.println();
-    		
-    	}
-	}
+//    public static void main(String[] args) {
+//    	DatabaseSQLite obj = new DatabaseSQLite();
+//    	obj.createDatabaseIfNotExists();
+//    	obj.insertData();
+//    	ArrayList<ArrayList<String>> data = obj.getData();
+//    	for(ArrayList<String> temp: data)
+//    	{
+//    		for(String temp1: temp)
+//    		{
+//    			System.out.print(temp1+" : ");
+//    		}
+//    		System.out.println();
+//    		
+//    	}
+//	}
 }  
 
