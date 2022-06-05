@@ -339,10 +339,10 @@ public class DatabaseSQLite extends Tools
     				temp.add(rsmd.getColumnName(column).toLowerCase());
     			}
     		}
-    		close(resultSet);
     		header.add(temp);
     		// get content
     		content = getDataFromDB(sql, resultSet, rsmd);
+    		close(resultSet);
     		// migrate
     		for(ArrayList<String> migrate: header)
     		{
