@@ -105,13 +105,13 @@ public class DatabaseSQLite extends Tools
     public ArrayList <ArrayList<String>> getAllData()
     {
         String sql = "SELECT "
-                + "person.id, "
-                + "person.name, "
-                + "person.lastname, "
-                + "person.email, "
-                + "person.address, "
-                + "login.p_password, "
-                + "login.p_admin "
+                + "person.id as id, "
+                + "person.name as name, "
+                + "person.lastname as lastname, "
+                + "person.email as email, "
+                + "person.address as address, "
+                + "login.p_password as password, "
+                + "login.p_admin as admin "
                 + "FROM person "
                 + "join login on person.id = login.p_id";
         ArrayList <ArrayList<String>> data = getDataFromDBWithHeader(sql);
