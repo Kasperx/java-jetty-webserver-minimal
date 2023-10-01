@@ -116,7 +116,7 @@ public class Web
     {
             logger.info("");
             logger.info("### This program is a webserver with a custom backend that connects to the custom webfolder (by parameter) ###");
-            logger.info(" It will show you available database tables to select, shows nearly all content and can export a file (-> new iafisspy)");
+            logger.info(" It will show you available database tables to select and shows nearly all content.");
             logger.info("Syntax: [-help | -h | -? | ?] <--httpport{1025-65536}> <--httpbase{}>");
             logger.info("\t Options");
             logger.info("\t\t -h/-help/-?/?                  show this help and exit");
