@@ -1,0 +1,590 @@
+package main.java.com.mywebsite.main;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.net.URI;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Vector;
+import java.util.stream.Collectors;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.http.HttpResponse;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.Credentials;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.CredentialsProvider;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.utils.URIBuilder;
+import org.apache.http.impl.client.BasicCredentialsProvider;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.logging.log4j.Logger;
+
+import main.java.com.mywebsite.common.MyLogger;
+import main.java.com.mywebsite.database.Database;
+import main.java.com.mywebsite.database.Database.DatabaseType;
+import main.java.com.mywebsite.database.DatabaseFile;
+import main.java.com.mywebsite.database.DatabaseSQLite;
+
+public class DataUse
+{
+    static Database databasesource;
+    String httpbase;
+    static String htmlhead_halfSize;
+    static String htmlhead_fullSize;
+    static String htmlend;
+    static Database.DatabaseType databaseType;
+    static Logger logger = MyLogger.getLogger(Database.class.getName());
+    
+    public DataUse()
+    {
+        ///////////////////////////////////////////
+        // get libs from online
+        htmlhead_halfSize = ""
+                + "<!DOCTYPE html>"
+                + "<head>"
+                + "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">"
+                + "<meta charset=\"utf-8\">"
+                + "<link rel=\"stylesheet\" href=\"https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css\">"
+                + "<script src=\"https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js\"></script>"
+                + "<script src=\"https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js\"></script>"
+                + "</head>"
+                + "<body class=\"container\" style=\"font-size:30px\";>"
+//                + "<body>"
+//                + "<div class=\"container\" style=\"font-size:30px\";>"
+                ;
+        htmlhead_fullSize = ""
+        		+ "<!DOCTYPE html>"
+        		+ "<head>"
+        		+ "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">"
+        		+ "<meta charset=\"utf-8\">"
+        		+ "<link rel=\"stylesheet\" href=\"https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css\">"
+        		+ "<script src=\"https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js\"></script>"
+        		+ "<script src=\"https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js\"></script>"
+        		+ "</head>"
+        		+ "<body class=\"container-fluid\" style=\"font-size:30px\";>"
+//                + "<body>"
+//                + "<div class=\"container\" style=\"font-size:30px\";>"
+;
+        // get libs from offline
+//        htmlhead = ""
+//                + "<!DOCTYPE html>\n"
+//                + "<head>"
+//                + "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">"
+//                + "<meta charset=\"utf-8\">"
+//                + "<script src=\"libraries/jquery-3.3.1.min.js\"></script>"
+//                + "<script src=\"libraries/bootstrap-3.3.7-dist/js/bootstrap.js\"></script>"
+//                + "<script src=\"libraries/bootstrap-3.3.7-dist/js/bootstrap.min.js\"></script>"
+//                + "<link rel=\"stylesheet\" href=\"libraries/bootstrap-3.3.7-dist/css/bootstrap.min.css\">"
+//                + "<script src=\"libraries/moment.js\"></script>\n"
+//                + "<script src=\"libraries/moment-with-locales.js\"></script>"
+//                + "</head>"
+//                + "<body class=\"container\">"
+//                ;
+        htmlend = ""
+                + "</body>"
+                ;
+        databaseType = Database.DatabaseType.getValue();
+        databasesource = Database.getInstance(databaseType);
+//        databasesource = Database.getInstance(Database.DatabaseType.file);
+//        databasesource = Database.getInstance(Database.DatabaseType.postgres);
+        databasesource.setHeaderInUppercaseCharacter(true);
+        databasesource.getProperties(System.getProperty("user.dir")+File.separator+"login.txt");
+    }
+    /**
+     * 
+     * @param httpbase
+     */
+    public void sethttpbase(String httpbase)
+    {
+        this.httpbase = httpbase;
+    }
+    /**
+     * 
+     * @param request
+     * @param response
+     */
+    public void clientRequest_Website (HttpServletRequest request, HttpServletResponse response)
+    {
+        try {
+            // value of filenames by client come with a slash, but java doesn't find files with slash, so cut first char...
+            String wantedFileFromClient = httpbase+File.separator+request.getServletPath().substring(1);
+            String fileContent;
+            if (new File(wantedFileFromClient+"index.html").exists()) {
+                wantedFileFromClient += "index.html";
+            }
+            fileContent = readFile(wantedFileFromClient);
+            PrintWriter out = response.getWriter();
+            if (wantedFileFromClient.endsWith(".html")) {
+                response.setContentType("text/html;charset=UTF-8");
+            }
+            else if (wantedFileFromClient.endsWith(".css")) {
+                response.setContentType("text/css;charset=UTF-8");
+            }
+            else if (wantedFileFromClient.endsWith(".js")){
+                response.setContentType("application/json;charset=UTF-8");
+            }
+            response.addHeader("Access-Control-Allow-Origin", "*");
+            response.setStatus(HttpServletResponse.SC_OK);
+            response.reset();
+            out.print(fileContent);
+            //out.close();
+        }
+        catch (Exception e) {
+            System.err.println(e.toString());
+        }
+    }
+    /**
+     * 
+     * @param request
+     * @param response
+     */
+    public void clientRequest_WebsiteFromBackend(HttpServletRequest request, HttpServletResponse response)
+    {
+        try
+        {
+            logger.info("Found request: "+request.getParameter("get"));
+            response.setCharacterEncoding("utf-8");
+            response.setContentType("text/html");
+            response.setStatus(HttpServletResponse.SC_OK);
+            String websitedata = htmlhead_halfSize;
+            websitedata += "<table class=\"table\">";
+//            websitedata += "<tr>"
+//                    + "<th>name</th>"
+//                    + "</tr>"
+//                    + "</thead>";
+            websitedata += ""
+                    + "<ul>"
+                    + "<div> some codes </div>"
+//                    + "<li><a href=\"localtion/?get=example\" target=\"_blank\">read from db</a></li>"
+//                    + "<li><a href=\"localtion/?get=insert\" target=\"_blank\">insert data</a></li>"
+//                    + "<li><a href=\"localtion/?get=data\" target=\"_blank\">get data</a></li>"
+                    + "<li><a href=\"?get=insert\">insert data</a></li>"
+                    + "<li><a href=\"?get=data\">get data</a></li>"
+                    + "<li><a href=\"?get=admin\">get all data</a></li>"
+                    + "</ul>"
+                    ;
+            websitedata += "</thead>";
+            websitedata += "</table>";
+            websitedata += htmlend;
+            response.getWriter().println(websitedata);
+//            PrintWriter out = response.getWriter();
+//            out.print(result);
+//            out.close();
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    /**
+     * 
+     * @param request
+     * @param response
+     */
+    public static void clientRequest_Weather(HttpServletRequest request, HttpServletResponse response)
+    {
+        try {
+            logger.info("Found request: "+request.getParameter("get"));
+            String url = "https://dwd.api.bund.dev/stationOverviewExtended";
+            CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
+//            Credentials credentials = new UsernamePasswordCredentials("username", "password");
+            Credentials credentials = new UsernamePasswordCredentials("", "");
+            credentialsProvider.setCredentials(AuthScope.ANY, credentials);
+            HttpClient client = HttpClientBuilder.create()
+                    .setDefaultCredentialsProvider(credentialsProvider)
+                    .build();
+//            HttpPost requ = new HttpPost(url);
+            //////////////////
+            URIBuilder builder = new URIBuilder();
+//            builder.setScheme("https").setHost("dwd.api.bund.dev").setPath("/stationOverviewExtended")
+//                .setParameter("stationIds", "NW");
+            // https://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lon}&appid={API key}
+            builder
+            .setScheme("https")
+            .setHost("api.openweathermap.org")
+            .setPath("/data/2.5/weather")
+//            .setParameter("zip", "E14")
+            .setParameter("lon", "51.5135872")
+            .setParameter("lat", "7.4652981")
+            .setParameter("appid", databasesource.getProperty("key"));
+            URI uri = builder.build();
+            logger.info(uri);
+            HttpGet httpget = new HttpGet(uri);
+            //////////////////
+//            HttpResponse resp = client.execute(requ);
+            HttpResponse resp = client.execute(httpget);
+            // Get the response
+            BufferedReader rd = new BufferedReader(new InputStreamReader(resp.getEntity().getContent()));
+            String line = "";
+            String textView = "";
+            while ((line = rd.readLine()) != null)
+            {    
+                textView += line;
+            logger.info(textView);
+            }
+//            logger.info(textView);
+            rd.close();
+            response.setCharacterEncoding("utf-8");
+            response.setContentType("text/json");
+            response.setStatus(HttpServletResponse.SC_OK);
+            response.getWriter().append(textView);
+        }
+        catch (Exception e)
+        {
+            System.err.println(e.toString());
+        }
+    }
+    /**
+     * 
+     * @param request
+     * @param response
+     */
+    public static void clientRequest_CallDataFromDb(HttpServletRequest request, HttpServletResponse response)
+    {
+        try
+        {
+            logger.info("Found request: "+request.getParameter("get"));
+            response.setCharacterEncoding("utf-8");
+            response.setContentType("text/html");
+            response.setStatus(HttpServletResponse.SC_OK);
+            ArrayList <ArrayList<String>> data = databasesource.getData();
+            String websitedata = fillWebsiteWithData(data);
+            logger.info(websitedata);
+            response.getWriter().append(websitedata);
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+    }
+//    public static void clientRequest_CallDataFromDb(HttpServletRequest request, HttpServletResponse response)
+//    {
+//    	try
+//    	{
+//    		logger.info("Found request: "+request.getParameter("get"));
+////            DatabaseSQLite database = new DatabaseSQLite();
+//    		ArrayList <ArrayList<String>> data = databasesource.getData();
+//    		databasesource.close();
+////            response.getWriter().println("{ \"status\": \"ok\"}");
+////            array = new JSONArray(data);
+////            json_mapForJSON = new JSONObject();
+////            json_mapForJSON.put("Tablenames", array);
+////            String result = new GsonBuilder().create().toJson(json_mapForJSON);
+//    		response.setCharacterEncoding("utf-8");
+////            response.setContentType("application/json");
+//    		response.setContentType("text/html");
+//    		response.setStatus(HttpServletResponse.SC_OK);
+//    		String websitedata = htmlhead;
+//    		websitedata += "<table class=\"table\">";
+//    		websitedata += "<tr>"
+//    				+ "<th>name</th>"
+//    				+ "</tr>"
+//    				+ "</thead>";
+////            for(String temp: data)
+////            {
+////                websitedata += "<tr><td>";
+////                websitedata += temp;
+////                websitedata += "</tr></td>";
+////            }
+//    		for(ArrayList <String> tempList: data)
+//    		{
+//    			websitedata += "<tr>";
+//    			for(String temp: tempList)
+//    			{
+//    				websitedata += "<td>";
+//    				websitedata += temp;
+//    				websitedata += "</td>";
+//    			}
+//    			websitedata += "</tr>";
+//    		}
+//    		websitedata += "</thead>";
+//    		websitedata += "</table>";
+//    		websitedata += htmlend;
+////            response.getWriter().println(websitedata);
+//    		response.getWriter().append(websitedata);
+////            PrintWriter out = response.getWriter();
+////            out.print(result);
+////            out.close();
+//    	}
+//    	catch (Exception e) {
+//    		e.printStackTrace();
+//    	}
+//    }
+    /**
+     * 
+     * @param request
+     * @param response
+     */
+    public static void clientRequest_askUserData(HttpServletRequest request, HttpServletResponse response)
+    {
+        try
+        {
+            response.setCharacterEncoding("utf-8");
+            response.setContentType("text/html");
+            response.setStatus(HttpServletResponse.SC_OK);
+            String websitedata = htmlhead_halfSize;
+            websitedata += "<form>";
+            websitedata += ""
+                    + "<label for=\"name\">name:</label><br>"
+                    + "<input type=\"text\" id=\"name\"><br>"
+                    + "<label for=\"pwd\">password:</label><br>"
+                    + "<input type=\"password\" id=\"password\""
+//                    + "pattern=\"(?=.*\\d)(?=.*[a-z])(?=.*[A-Z]).{8,}\" title=\"<Must contain at least one number and one uppercase and lowercase letter and at least 8 or more characters\" required"
+                    + "><br>"
+                    + "<input type=\"submit\" value=\"Submit\">"
+                    ;
+            websitedata += "</form>";
+            websitedata += "<script>";
+            websitedata += ""
+                    + "const form = document.getElementById('name');\n"
+                    + "const log = document.getElementById('password');\n"
+                    + "form.addEventListener('submit', logSubmit);";
+            websitedata += "</script>";
+            websitedata += htmlend;
+            response.getWriter().println(websitedata);
+        }
+        catch(IOException e)
+        {
+            e.printStackTrace();
+        }
+    }
+    /**
+     * 
+     * @param request
+     * @param response
+     */
+    public static void clientRequest_GetAllData(HttpServletRequest request, HttpServletResponse response)
+    {
+        try
+        {
+            logger.info("Found request: "+request.getParameter("get"));
+            logger.info("Found request: "+request.getParameter("name"));
+            String name = request.getParameter("user");
+            String pw = request.getParameter("pw");
+            if(databasesource.isPermitted(name, pw))
+            {
+                response.setCharacterEncoding("utf-8");
+//            response.setContentType("application/json");
+                response.setContentType("text/html");
+                response.setStatus(HttpServletResponse.SC_OK);
+                ArrayList <ArrayList<String>> data = databasesource.getAllData();
+                String websitedata = fillWebsiteWithData(data, true);
+                response.getWriter().println(websitedata);
+            }
+            else
+            {
+                response.setCharacterEncoding("utf-8");
+                response.setContentType("application/json");
+                response.setStatus(HttpServletResponse.SC_OK);
+                response.getWriter().println("{ \"status\": \"wrong data\"}");
+            }
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+    }
+    /**
+     * 
+     * @param data
+     * @return
+     */
+    private static String fillWebsiteWithData(ArrayList <ArrayList<String>> data)
+    {
+    	return fillWebsiteWithData(data, false);
+    }
+    /**
+     * 
+     * @param data
+     * @param admin
+     * @return
+     */
+	private static String fillWebsiteWithData(ArrayList <ArrayList<String>> data, boolean admin)
+	{
+		String websitedata;
+		if(admin)
+		{
+			websitedata = htmlhead_fullSize;
+		} else {
+			websitedata = htmlhead_halfSize;
+		}
+		websitedata += "<table class=\"table\">";
+		websitedata += "<thead>";
+		for(int row=0; row<data.size(); row++)
+		{
+			// build header
+			ArrayList <String> tempList = data.get(row);
+			if(row==0)
+			{
+				websitedata += "<thead>";
+				for(String temp: tempList)
+				{
+					websitedata += ""
+						+ "<th>"
+						+ temp
+						+ "</th>";	
+				}
+				websitedata += "</thead>";
+			}
+			// build data
+			else
+			{
+				websitedata += "<tr>";
+				for(String temp: tempList)
+				{
+		            websitedata += "<td>";
+		            websitedata += temp;
+		            websitedata += "</td>";
+				}
+				websitedata += "</tr>";
+			}
+		}
+		websitedata += "</table>";
+		websitedata += htmlend;
+		return websitedata;
+	}
+//    public static void clientRequest_GetAllData(HttpServletRequest request, HttpServletResponse response)
+//    {
+//        try
+//        {
+//            JSONObject json_mapForJSON = null;
+//            logger.info("Found request: "+request.getParameter("get"));
+//            logger.info("Found request: "+request.getParameter("name"));
+//            ////////////////////
+//            DatabaseConnect database = new DatabaseConnect();
+//            if(database.isPermitted(request.getParameter("name"), request.getParameter("pw")))
+//            {
+//                logger.info();
+//            }
+//            ArrayList <String> data = database.getData();
+//            JSONArray array = new JSONArray();
+//            array = new JSONArray(data);
+//            json_mapForJSON = new JSONObject();
+//            json_mapForJSON.put("Tablenames", array);
+//            String result = new GsonBuilder().create().toJson(json_mapForJSON);
+//            response.setCharacterEncoding("utf-8");
+//            response.setContentType("application/json");
+//            response.setStatus(HttpServletResponse.SC_OK);
+//            PrintWriter out = response.getWriter();
+//            out.print(result);
+//            out.close();
+//        }
+//        catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//    }
+	/**
+	 * 
+	 * @param request
+	 * @param response
+	 */
+    public static void clientRequest_InsertDataToDb(HttpServletRequest request, HttpServletResponse response)
+    {
+        try
+        {
+            logger.info("Found request: "+request.getParameter("get"));
+            databasesource.createDatabaseIfNotExists();
+            switch (databaseType)
+            {
+			case sqlite:
+				((DatabaseSQLite)databasesource.getInstance()).insertData();
+				break;
+			case file:
+				((DatabaseFile)databasesource.getInstance()).insertData();
+				break;
+			default:
+				break;
+			}
+            response.setCharacterEncoding("utf-8");
+            response.setContentType("application/json");
+            response.setStatus(HttpServletResponse.SC_OK);
+            response.getWriter().println("{ \"status\": \"ok\"}");
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    /**
+     * 
+     * @param dataRows
+     * @return
+     */
+    private List <List<String>> vectorToArrayList2D (Vector dataRows)
+    {
+        List <List<String>> array = new ArrayList<List<String>>();
+        for (int i=0; i<dataRows.size(); i++)
+        {
+             Vector data_cols = (Vector)dataRows.elementAt(i);
+             ArrayList <String> temp = new ArrayList<String>();
+             for(int col=0; col<data_cols.size(); col++) {
+                 temp.add(data_cols.elementAt(col).toString());
+             }
+             array.add(temp);
+        }
+        return array;
+    }
+    /**
+     * 
+     * @param fileName
+     * @return
+     */
+    private String readFile (String fileName)
+    {        
+        List<String> filecontent = loadFile(fileName);
+        if(filecontent == null) {
+            return null;
+        }
+        String ckasl= "";
+        for (String temp: filecontent) {
+            ckasl += temp + "\n";
+        }
+        filecontent.clear(); 
+        logger.info("Reading file: "+fileName);
+        return ckasl;
+    }
+    /**
+     * 
+     * @param fpath
+     * @return
+     */
+    public List <String> loadFile(String fpath)
+    {
+        try
+        {
+        	if(new File(fpath).exists())
+        	{
+		        return new ArrayList<String>(
+		                Files.readAllLines(
+		                        Paths.get(fpath),
+		                        StandardCharsets.UTF_8)
+		                );
+        	}
+        	else
+        	{
+        		new File(fpath).createNewFile();
+        		return new ArrayList<String>();
+        	}
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+    /**
+     * 
+     * @param array
+     * @return
+     */
+    private ArrayList <String> makeListEntriesUnique (ArrayList <String> array)
+    {
+        return (ArrayList) array.stream().distinct().collect(Collectors.toList());
+    }
+}
