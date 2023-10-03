@@ -168,7 +168,7 @@ public class DatabaseFile extends Database implements Serializable
     public void insertData()
     {
         int id=0;
-        HashMap <String, Integer> result = getNewData();
+        HashMap <String[], Integer> result = getNewData();
         ///////////////////////////////////////////////////////////
         ArrayList <DatabaseFile> data = new ArrayList<DatabaseFile>();
         data.add(new DatabaseFile(
@@ -178,27 +178,16 @@ public class DatabaseFile extends Database implements Serializable
                 "secret",
                 true
                 ));
-        for(Entry <String, Integer> entry: result.entrySet())
+        for(Entry <String[], Integer> entry: result.entrySet())
         {
             data.add(new DatabaseFile(
                   id++,
-                  entry.getKey().split(":")[0],
-                  entry.getKey().split(":")[1],
+                  entry.getKey()[0].split(":")[0],
+                  entry.getKey()[1].split(":")[1],
                   String.valueOf(entry.getValue()),
                   false
                   ));
         }
-        
-//        ArrayList <DatabaseFile> data = new ArrayList<DatabaseFile>();
-//        for(int i=0; i<10; i++)
-//        {
-//            data.add(new DatabaseFile(
-//                    id++,
-//                    "hallo"+String.valueOf(new Random().nextInt(10) + (10)),
-//                    String.valueOf(new Random().nextInt(1000000) + (100000)),
-//                    false
-//                    ));
-//        }
         try(ObjectOutputStream write= new ObjectOutputStream (new FileOutputStream(path)))
         {
             for(DatabaseFile temp: data)
